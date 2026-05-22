@@ -26,3 +26,7 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 node_modules
+
+# Claude Code internal
+.claude/
+.superpowers/
