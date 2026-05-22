@@ -1,0 +1,128 @@
+<h2>Where should the Profile Introduction video live?</h2>
+<p class="subtitle">Three placement options — pick the one that feels right for this profile page</p>
+
+<div class="cards">
+
+  <!-- Option A: New Tab -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f9fafb;">
+      <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(16,24,40,0.1);overflow:hidden;font-family:sans-serif;">
+        <!-- Profile header -->
+        <div style="display:flex;align-items:center;gap:16px;padding:16px 20px 12px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:#3a58ef;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;flex-shrink:0;">JS</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#101828;">John Smith</div>
+            <div style="font-size:11px;color:#667085;margin-top:4px;">3 Yrs 2 Mo &nbsp;|&nbsp; 28 Hrs Learning &nbsp;|&nbsp; 8 Skills</div>
+          </div>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex;border-top:1px solid #eaecf0;padding:0 12px;gap:2px;overflow-x:auto;">
+          <div style="padding:8px 10px;font-size:11px;color:#667085;white-space:nowrap;">Personal</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;white-space:nowrap;">Professional</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;white-space:nowrap;">Skill Set</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;white-space:nowrap;">Learning</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;white-space:nowrap;">Interview</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;white-space:nowrap;">Timesheet</div>
+          <div style="padding:8px 10px 6px;font-size:11px;color:#3a58ef;font-weight:600;white-space:nowrap;border-bottom:2px solid #3a58ef;">🎬 Profile Intro</div>
+        </div>
+        <!-- Tab content preview -->
+        <div style="padding:16px 20px;min-height:80px;display:flex;align-items:center;justify-content:center;background:#f9fafb;">
+          <div style="text-align:center;">
+            <div style="width:56px;height:36px;background:#eaecf0;border-radius:4px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;">▶</div>
+            <div style="font-size:11px;color:#667085;">No intro video added yet</div>
+            <div style="font-size:10px;color:#3a58ef;margin-top:4px;cursor:pointer;">+ Add Video</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — New Tab (7th tab)</h3>
+      <p>Add "Profile Introduction" as the last tab after Timesheet Summary. Clean separation; consistent with existing tab pattern.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Familiar pattern</li><li>Full content area</li><li>Easy to find</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>One more tab to navigate</li><li>Doesn't stand out</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Embedded in Profile Header -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f9fafb;">
+      <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(16,24,40,0.1);overflow:hidden;font-family:sans-serif;">
+        <!-- Profile header with video thumbnail -->
+        <div style="display:flex;align-items:center;gap:16px;padding:16px 20px 12px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:#3a58ef;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;flex-shrink:0;">JS</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:15px;color:#101828;">John Smith</div>
+            <div style="font-size:11px;color:#667085;margin-top:4px;">3 Yrs 2 Mo &nbsp;|&nbsp; 28 Hrs &nbsp;|&nbsp; 8 Skills</div>
+          </div>
+          <!-- Video thumbnail on the right -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="width:72px;height:44px;background:#ebeefd;border:2px dashed #3a58ef;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;">+</div>
+            <div style="font-size:10px;color:#3a58ef;font-weight:500;">Add Intro Video</div>
+          </div>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex;border-top:1px solid #eaecf0;padding:0 12px;gap:2px;">
+          <div style="padding:8px 10px;font-size:11px;color:#3a58ef;font-weight:600;border-bottom:2px solid #3a58ef;">Personal</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Professional</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Skill Set</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Learning</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Interview</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Timesheet</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Embedded in Profile Header</h3>
+      <p>Place a compact video thumbnail/button in the profile header card, alongside the avatar and stats. Always visible regardless of which tab is active.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Always visible</li><li>Premium feel</li><li>No extra tab needed</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Header gets busier</li><li>Less content space</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Banner/section below header, above tabs -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f9fafb;">
+      <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(16,24,40,0.1);overflow:hidden;font-family:sans-serif;">
+        <!-- Profile header -->
+        <div style="display:flex;align-items:center;gap:16px;padding:16px 20px 12px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:#3a58ef;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;flex-shrink:0;">JS</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#101828;">John Smith</div>
+            <div style="font-size:11px;color:#667085;margin-top:4px;">3 Yrs 2 Mo &nbsp;|&nbsp; 28 Hrs &nbsp;|&nbsp; 8 Skills</div>
+          </div>
+        </div>
+        <!-- Video intro strip -->
+        <div style="margin:0 20px 10px;background:#f0f3fe;border:1px dashed #3a58ef;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:28px;background:#ebeefd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;">🎬</div>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:600;color:#3a58ef;">Profile Introduction Video</div>
+            <div style="font-size:10px;color:#667085;">No video added — click to add a link or upload a file</div>
+          </div>
+          <div style="font-size:10px;color:#3a58ef;font-weight:600;cursor:pointer;">+ Add</div>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex;border-top:1px solid #eaecf0;padding:0 12px;gap:2px;">
+          <div style="padding:8px 10px;font-size:11px;color:#3a58ef;font-weight:600;border-bottom:2px solid #3a58ef;">Personal</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Professional</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Skill Set</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Learning</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Interview</div>
+          <div style="padding:8px 10px;font-size:11px;color:#667085;">Timesheet</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Persistent Strip in Profile Card</h3>
+      <p>A slim, always-visible banner between the profile stats and tabs. Shows video status at a glance from any tab. Expands inline when editing.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Always visible</li><li>Doesn't crowd header</li><li>Clear status</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Adds height to header</li><li>Slight disruption to flow</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

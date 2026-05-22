@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Option B — Profile Intro Video (Design System)</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f2f4f7; padding: 28px; color: #101828; }
+
+  h1 { font-size: 18px; font-weight: 700; color: #101828; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: #667085; margin-bottom: 24px; }
+  .section-header { font-size: 13px; font-weight: 700; color: #3a58ef; text-transform: uppercase; letter-spacing: .6px; margin: 28px 0 10px; border-bottom: 1px solid #ebeefd; padding-bottom: 6px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .state-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #667085; margin-bottom: 6px; }
+
+  /* ── Profile Card shell ───────────────── */
+  .profile-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(16,24,40,.10), 0 1px 2px rgba(16,24,40,.06);
+    overflow: visible;
+    position: relative;
+  }
+  .profile-header { display: flex; align-items: center; gap: 16px; padding: 20px 24px 16px; }
+  .avatar-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+  .avatar-svg { position: absolute; inset: 0; }
+  .avatar-inner {
+    position: absolute; inset: 7px; border-radius: 50%;
+    background: #3a58ef; display: flex; align-items: center; justify-content:center;
+    color: white; font-weight: 700; font-size: 16px;
+  }
+  .avatar-pct {
+    position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%);
+    background: white; border: 1px solid #eaecf0; border-radius: 10px;
+    padding: 1px 5px; font-size: 9px; font-weight: 700; color: #344054; white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(16,24,40,.06);
+  }
+  .profile-info { flex: 1; }
+  .profile-name { font-size: 18px; font-weight: 700; color: #101828; line-height: 1.3; }
+  .profile-stats { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+  .stat-label { font-size: 12px; color: #667085; }
+  .stat-val { font-size: 12px; font-weight: 600; color: #3a58ef; }
+  .stat-div { color: #d0d5dd; font-size: 12px; }
+  .tabs-row {
+    display: flex; border-top: 1px solid #eaecf0; padding: 0 14px;
+  }
+  .tab { padding: 10px 12px; font-size: 13px; font-weight: 500; color: #667085; white-space: nowrap; border-bottom: 2px solid transparent; cursor: pointer; }
+  .tab.active { color: #3a58ef; border-bottom-color: #3a58ef; font-weight: 600; }
+  .tab-body { padding: 12px 20px; background: white; border-radius: 0 0 8px 8px; min-height: 44px; }
+  .tab-placeholder { font-size: 12px; color: #98a2b3; }
+
+  /* ── Video slot variants ─────────────── */
+  /* Empty */
+  .vid-empty {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 12px; border-radius: 6px; border: 1.5px dashed #d0d5dd;
+    cursor: pointer; transition: border-color .15s, background .15s;
+    background: transparent;
+  }
+  .vid-empty:hover { border-color: #3a58ef; background: #f5f8ff; }
+  .vid-empty-icon { font-size: 14px; }
+  .vid-empty-label { font-size: 12px; font-weight: 500; color: #667085; }
+  .vid-empty:hover .vid-empty-label { color: #3a58ef; }
+
+  /* Link chip */
+  .vid-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; border-radius: 6px; border: 1px solid #eaecf0;
+    background: #f9fafb;
+  }
+  .vid-link-icon { width: 28px; height: 28px; border-radius: 4px; background: #ebeefd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+  .vid-link-text { flex: 1; min-width: 0; }
+  .vid-link-label { font-size: 10px; color: #667085; line-height: 1; }
+  .vid-link-url { font-size: 11px; font-weight: 500; color: #3a58ef; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; cursor: pointer; }
+  .vid-link-url:hover { text-decoration: underline; }
+  .vid-dot { width: 6px; height: 6px; border-radius: 50%; background: #12b76a; flex-shrink: 0; }
+
+  /* File chip */
+  .vid-file {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; border-radius: 6px; border: 1px solid #eaecf0;
+    background: #f9fafb;
+  }
+  .vid-file-icon { width: 28px; height: 28px; border-radius: 4px; background: #101828; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+  .vid-file-text { flex: 1; min-width: 0; }
+  .vid-file-name { font-size: 11px; font-weight: 500; color: #344054; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+  .vid-file-size { font-size: 10px; color: #667085; }
+
+  /* 3-dot menu button */
+  .vid-menu-btn {
+    width: 24px; height: 24px; border-radius: 4px; background: transparent;
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #667085; flex-shrink: 0; transition: background .15s;
+  }
+  .vid-menu-btn:hover { background: #eaecf0; color: #344054; }
+
+  /* ── Popover ────────────────────────── */
+  .popover {
+    position: absolute; top: 56px; right: 0;
+    background: white; border: 1px solid #eaecf0; border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(16,24,40,.12), 0 2px 8px rgba(16,24,40,.06);
+    width: 248px; z-index: 40; overflow: hidden;
+  }
+  .pop-head { padding: 12px 16px 10px; border-bottom: 1px solid #eaecf0; }
+  .pop-title { font-size: 13px; font-weight: 600; color: #101828; }
+  .pop-sub { font-size: 11px; color: #667085; margin-top: 2px; }
+  .pop-body { padding: 10px; }
+  .pop-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent;
+    transition: background .12s, border-color .12s;
+  }
+  .pop-opt:hover { background: #f5f8ff; border-color: #c5cae0; }
+  .pop-opt + .pop-opt { margin-top: 4px; }
+  .pop-opt-icon { width: 32px; height: 32px; border-radius: 6px; background: #ebeefd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+  .pop-opt-label { font-size: 12px; font-weight: 600; color: #344054; }
+  .pop-opt-desc { font-size: 11px; color: #667085; margin-top: 1px; }
+
+  /* Input popover */
+  .pop-input { width: 100%; border: 1px solid #d0d5dd; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #101828; outline: none; transition: border-color .15s; }
+  .pop-input:focus { border-color: #3a58ef; }
+  .pop-input-label { font-size: 11px; color: #667085; margin-bottom: 4px; }
+  .pop-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .btn-sm-outline { flex: 1; padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 4px; background: white; font-size: 12px; font-weight: 600; color: #344054; cursor: pointer; }
+  .btn-sm-primary { flex: 1; padding: 6px 10px; border: none; border-radius: 4px; background: #3a58ef; font-size: 12px; font-weight: 600; color: white; cursor: pointer; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+
+  /* Dropdown menu */
+  .dropdown {
+    position: absolute; top: 40px; right: 0;
+    background: white; border: 1px solid #eaecf0; border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(16,24,40,.1); width: 148px; z-index: 40; padding: 4px 0; overflow: hidden;
+  }
+  .dd-item { padding: 8px 14px; font-size: 12px; color: #344054; cursor: pointer; display: flex; align-items: center; gap: 7px; }
+  .dd-item:hover { background: #f9fafb; }
+  .dd-item.danger { color: #f04438; }
+  .dd-item.danger:hover { background: #fff5f5; }
+  .dd-divider { height: 1px; background: #eaecf0; margin: 3px 0; }
+
+  /* Remove modal */
+  .modal-overlay { background: rgba(0,0,0,.3); border-radius: 8px; position: relative; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal-card { background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(16,24,40,.16); padding: 20px 22px; width: 100%; max-width: 280px; }
+  .modal-icon { width: 40px; height: 40px; border-radius: 8px; background: #fff0ee; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 18px; }
+  .modal-title { font-size: 14px; font-weight: 600; color: #101828; margin-bottom: 4px; }
+  .modal-body { font-size: 12px; color: #667085; line-height: 1.5; margin-bottom: 14px; }
+  .modal-actions { display: flex; gap: 8px; }
+  .btn-ghost { flex: 1; padding: 8px; border: 1px solid #d0d5dd; border-radius: 4px; background: white; font-size: 12px; font-weight: 600; color: #344054; cursor: pointer; }
+  .btn-danger { flex: 1; padding: 8px; border: none; border-radius: 4px; background: #f04438; font-size: 12px; font-weight: 600; color: white; cursor: pointer; }
+
+  /* upload zone */
+  .upload-zone {
+    border: 2px dashed #d0d5dd; border-radius: 6px; padding: 14px 12px;
+    text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .upload-zone:hover { border-color: #3a58ef; background: #f5f8ff; }
+  .upload-zone-icon { font-size: 22px; margin-bottom: 6px; }
+  .upload-zone-label { font-size: 12px; color: #344054; font-weight: 600; }
+  .upload-zone-sub { font-size: 10px; color: #667085; margin-top: 2px; }
+  .upload-browse { color: #3a58ef; font-weight: 600; }
+
+  /* progress bar */
+  .progress-bar-wrap { height: 6px; background: #eaecf0; border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .progress-bar { height: 100%; background: #3a58ef; border-radius: 99px; width: 65%; }
+  .progress-label { display: flex; justify-content: space-between; margin-top: 4px; }
+  .progress-label span { font-size: 10px; color: #667085; }
+</style>
+</head>
+<body>
+
+<h1>Option B — Profile Introduction Video</h1>
+<p class="page-sub">All states, design-system accurate · Option B: video slot embedded in profile header card</p>
+
+<!-- ────────────── STATE 1: No video ────────────── -->
+<div class="section-header">State 1 — No video added yet</div>
+<div style="max-width:560px;">
+  <div class="state-label">Header shows a subtle "Add intro video" button on the right</div>
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-wrap">
+        <svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/>
+          <circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round"
+            stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/>
+        </svg>
+        <div class="avatar-inner">JS</div>
+        <div class="avatar-pct">70%</div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">John Smith</div>
+        <div class="profile-stats">
+          <span class="stat-label">Total Years with MyCPE :</span>
+          <span class="stat-val">3 Yrs 2 Mo</span>
+          <span class="stat-div">|</span>
+          <span class="stat-label">Learning Hours :</span>
+          <span class="stat-val">28 Hrs</span>
+          <span class="stat-div">|</span>
+          <span class="stat-label">Skills :</span>
+          <span class="stat-val">8</span>
+        </div>
+      </div>
+      <!-- Empty video slot -->
+      <div class="vid-empty" style="flex-shrink:0;">
+        <span class="vid-empty-icon">🎬</span>
+        <span class="vid-empty-label">Add intro video</span>
+      </div>
+    </div>
+    <div class="tabs-row">
+      <div class="tab active">Personal Details</div>
+      <div class="tab">Professional Details</div>
+      <div class="tab">Skill Set</div>
+      <div class="tab">Timesheet Summary</div>
+    </div>
+    <div class="tab-body"><div class="tab-placeholder">Tab content renders here</div></div>
+  </div>
+</div>
+
+<!-- ────────────── STATE 2: Method picker popover ────────────── -->
+<div class="section-header">State 2 — Click "Add intro video" → method picker popover</div>
+<div class="grid-2" style="max-width:720px;">
+  <div>
+    <div class="state-label">2A · Method picker (choose link or upload)</div>
+    <div class="profile-card">
+      <div class="profile-header" style="padding-bottom:12px;">
+        <div class="avatar-wrap">
+          <svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg>
+          <div class="avatar-inner">JS</div>
+          <div class="avatar-pct">70%</div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">John Smith</div>
+          <div class="profile-stats">
+            <span class="stat-label">Total Years :</span><span class="stat-val">3 Yrs 2 Mo</span>
+            <span class="stat-div">|</span><span class="stat-label">Learning :</span><span class="stat-val">28 Hrs</span>
+          </div>
+        </div>
+        <div style="position:relative;flex-shrink:0;">
+          <div class="vid-empty" style="border-color:#3a58ef;background:#f5f8ff;">
+            <span class="vid-empty-icon">🎬</span>
+            <span class="vid-empty-label" style="color:#3a58ef;">Add intro video</span>
+          </div>
+          <div class="popover">
+            <div class="pop-head">
+              <div class="pop-title">Add Introduction Video</div>
+              <div class="pop-sub">Choose how to add your video</div>
+            </div>
+            <div class="pop-body">
+              <div class="pop-opt">
+                <div class="pop-opt-icon">🔗</div>
+                <div>
+                  <div class="pop-opt-label">Add via Link</div>
+                  <div class="pop-opt-desc">Paste a video embed URL</div>
+                </div>
+              </div>
+              <div class="pop-opt">
+                <div class="pop-opt-icon">⬆️</div>
+                <div>
+                  <div class="pop-opt-label">Upload from Device</div>
+                  <div class="pop-opt-desc">MP4, MOV, AVI · Max 200 MB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row" style="opacity:.4;">
+        <div class="tab active">Personal Details</div><div class="tab">Skill Set</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="state-label">2B · "Add via Link" selected → link input</div>
+    <div class="profile-card">
+      <div class="profile-header" style="padding-bottom:12px;">
+        <div class="avatar-wrap">
+          <svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg>
+          <div class="avatar-inner">JS</div><div class="avatar-pct">70%</div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">John Smith</div>
+          <div class="profile-stats"><span class="stat-label">Total Years :</span><span class="stat-val">3 Yrs 2 Mo</span></div>
+        </div>
+        <div style="position:relative;flex-shrink:0;">
+          <div class="vid-empty" style="border-color:#3a58ef;background:#f5f8ff;">
+            <span class="vid-empty-icon">🔗</span>
+            <span class="vid-empty-label" style="color:#3a58ef;">Add via link</span>
+          </div>
+          <div class="popover">
+            <div class="pop-head">
+              <div class="pop-title">Add Video Link</div>
+              <div class="pop-sub">Paste an embed URL for your intro video</div>
+            </div>
+            <div class="pop-body">
+              <div class="pop-input-label">Video Embed Link</div>
+              <input class="pop-input" value="https://youtube.com/embed/dQw4w9WgXcQ" />
+              <div class="pop-actions">
+                <button class="btn-sm-outline">Cancel</button>
+                <button class="btn-sm-primary">Save Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row" style="opacity:.4;"><div class="tab active">Personal Details</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── STATE 3: Upload flow ────────────── -->
+<div class="section-header">State 3 — Upload from device</div>
+<div class="grid-2" style="max-width:720px;">
+  <div>
+    <div class="state-label">3A · File picker popover</div>
+    <div class="profile-card">
+      <div class="profile-header" style="padding-bottom:12px;">
+        <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+        <div class="profile-info"><div class="profile-name">John Smith</div><div class="profile-stats"><span class="stat-label">Total Years :</span><span class="stat-val">3 Yrs 2 Mo</span></div></div>
+        <div style="position:relative;flex-shrink:0;">
+          <div class="vid-empty" style="border-color:#3a58ef;background:#f5f8ff;"><span class="vid-empty-icon">⬆️</span><span class="vid-empty-label" style="color:#3a58ef;">Upload video</span></div>
+          <div class="popover">
+            <div class="pop-head"><div class="pop-title">Upload Intro Video</div><div class="pop-sub">MP4, MOV, AVI · Max 200 MB</div></div>
+            <div class="pop-body">
+              <div class="upload-zone">
+                <div class="upload-zone-icon">📁</div>
+                <div class="upload-zone-label"><span class="upload-browse">Browse file</span> or drag & drop</div>
+                <div class="upload-zone-sub">MP4, MOV, AVI — max 200 MB</div>
+              </div>
+              <div class="pop-actions" style="margin-top:8px;">
+                <button class="btn-sm-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row" style="opacity:.4;"><div class="tab active">Personal Details</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="state-label">3B · Upload in progress</div>
+    <div class="profile-card">
+      <div class="profile-header" style="padding-bottom:12px;">
+        <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+        <div class="profile-info"><div class="profile-name">John Smith</div><div class="profile-stats"><span class="stat-label">Total Years :</span><span class="stat-val">3 Yrs 2 Mo</span></div></div>
+        <div style="position:relative;flex-shrink:0;">
+          <div class="vid-empty" style="border-color:#3a58ef;background:#ebeefd;cursor:default;"><span style="font-size:12px;color:#3a58ef;font-weight:600;">Uploading…</span></div>
+          <div class="popover">
+            <div class="pop-head"><div class="pop-title">Uploading video…</div><div class="pop-sub">Please wait</div></div>
+            <div class="pop-body">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="font-size:12px;color:#344054;font-weight:500;">intro_john_smith.mp4</span>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
+              <div class="progress-label"><span>65%</span><span>97.5 / 150 MB</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row" style="opacity:.4;"><div class="tab active">Personal Details</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── STATE 4: Video saved ────────────── -->
+<div class="section-header">State 4 — Video saved (link or file)</div>
+<div class="grid-2" style="max-width:720px;">
+
+  <div>
+    <div class="state-label">4A · Link saved — clickable URL, opens new tab</div>
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+        <div class="profile-info">
+          <div class="profile-name">John Smith</div>
+          <div class="profile-stats"><span class="stat-label">Total Years with MyCPE :</span><span class="stat-val">3 Yrs 2 Mo</span><span class="stat-div">|</span><span class="stat-label">Learning Hours :</span><span class="stat-val">28 Hrs</span><span class="stat-div">|</span><span class="stat-label">Skills :</span><span class="stat-val">8</span></div>
+        </div>
+        <!-- Link chip + dot menu -->
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div class="vid-link">
+            <div class="vid-link-icon">🔗</div>
+            <div class="vid-link-text">
+              <div class="vid-link-label">Intro video</div>
+              <div class="vid-link-url" title="https://youtube.com/embed/dQw4w9WgXcQ">youtube.com/embed/dQw…</div>
+            </div>
+            <div class="vid-dot"></div>
+          </div>
+          <div style="position:relative;">
+            <button class="vid-menu-btn">⋯</button>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row"><div class="tab active">Personal Details</div><div class="tab">Skill Set</div><div class="tab">Timesheet Summary</div></div>
+      <div class="tab-body"><div class="tab-placeholder">Tab content renders here</div></div>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:#667085;">↑ Clicking the URL opens the video in a new browser tab. No embedded preview shown.</div>
+  </div>
+
+  <div>
+    <div class="state-label">4B · File uploaded — filename + size, no preview</div>
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+        <div class="profile-info">
+          <div class="profile-name">John Smith</div>
+          <div class="profile-stats"><span class="stat-label">Total Years with MyCPE :</span><span class="stat-val">3 Yrs 2 Mo</span><span class="stat-div">|</span><span class="stat-label">Learning Hours :</span><span class="stat-val">28 Hrs</span></div>
+        </div>
+        <!-- File chip + dot menu -->
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div class="vid-file">
+            <div class="vid-file-icon">🎥</div>
+            <div class="vid-file-text">
+              <div class="vid-file-name">intro_john_smith.mp4</div>
+              <div class="vid-file-size">48.2 MB · May 2025</div>
+            </div>
+            <div class="vid-dot"></div>
+          </div>
+          <div style="position:relative;">
+            <button class="vid-menu-btn">⋯</button>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row"><div class="tab active">Personal Details</div><div class="tab">Skill Set</div><div class="tab">Timesheet Summary</div></div>
+      <div class="tab-body"><div class="tab-placeholder">Tab content renders here</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── STATE 5: ⋯ dropdown (manage) ────────────── -->
+<div class="section-header">State 5 — ⋯ menu (edit / replace / remove)</div>
+<div class="grid-2" style="max-width:720px;">
+
+  <div>
+    <div class="state-label">5A · ⋯ menu open on link video</div>
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+        <div class="profile-info"><div class="profile-name">John Smith</div><div class="profile-stats"><span class="stat-label">Total Years :</span><span class="stat-val">3 Yrs 2 Mo</span></div></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div class="vid-link">
+            <div class="vid-link-icon">🔗</div>
+            <div class="vid-link-text">
+              <div class="vid-link-label">Intro video</div>
+              <div class="vid-link-url">youtube.com/embed/dQw…</div>
+            </div>
+            <div class="vid-dot"></div>
+          </div>
+          <div style="position:relative;">
+            <button class="vid-menu-btn" style="background:#eaecf0;color:#344054;">⋯</button>
+            <div class="dropdown">
+              <div class="dd-item">✏️ Edit Link</div>
+              <div class="dd-divider"></div>
+              <div class="dd-item danger">🗑 Remove Video</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row" style="opacity:.5;"><div class="tab active">Personal Details</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="state-label">5B · ⋯ menu open on uploaded file</div>
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+        <div class="profile-info"><div class="profile-name">John Smith</div><div class="profile-stats"><span class="stat-label">Total Years :</span><span class="stat-val">3 Yrs 2 Mo</span></div></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div class="vid-file">
+            <div class="vid-file-icon">🎥</div>
+            <div class="vid-file-text">
+              <div class="vid-file-name">intro_john_smith.mp4</div>
+              <div class="vid-file-size">48.2 MB · May 2025</div>
+            </div>
+            <div class="vid-dot"></div>
+          </div>
+          <div style="position:relative;">
+            <button class="vid-menu-btn" style="background:#eaecf0;color:#344054;">⋯</button>
+            <div class="dropdown">
+              <div class="dd-item">🔄 Replace Video</div>
+              <div class="dd-divider"></div>
+              <div class="dd-item danger">🗑 Remove Video</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs-row" style="opacity:.5;"><div class="tab active">Personal Details</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── STATE 6: Edit link ────────────── -->
+<div class="section-header">State 6 — Edit link (pre-fills current URL)</div>
+<div style="max-width:340px;">
+  <div class="state-label">Clicking "Edit Link" reopens the link popover with the current URL pre-filled</div>
+  <div class="profile-card">
+    <div class="profile-header" style="padding-bottom:12px;">
+      <div class="avatar-wrap"><svg class="avatar-svg" width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="#eaecf0" stroke-width="4"/><circle cx="36" cy="36" r="30" fill="none" stroke="#3a58ef" stroke-width="4" stroke-linecap="round" stroke-dasharray="131.9 188.5" transform="rotate(-90 36 36)"/></svg><div class="avatar-inner">JS</div><div class="avatar-pct">70%</div></div>
+      <div class="profile-info"><div class="profile-name">John Smith</div></div>
+      <div style="position:relative;flex-shrink:0;">
+        <div class="vid-link" style="opacity:.5;"><div class="vid-link-icon">🔗</div><div class="vid-link-text"><div class="vid-link-url">youtube.com/embed/dQw…</div></div></div>
+        <div class="popover">
+          <div class="pop-head"><div class="pop-title">Edit Video Link</div><div class="pop-sub">Update your embed URL</div></div>
+          <div class="pop-body">
+            <div class="pop-input-label">Video Embed Link</div>
+            <input class="pop-input" value="https://youtube.com/embed/dQw4w9WgXcQ" style="border-color:#3a58ef;" />
+            <div class="pop-actions">
+              <button class="btn-sm-outline">Cancel</button>
+              <button class="btn-sm-primary">Update Link</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tabs-row" style="opacity:.4;"><div class="tab active">Personal Details</div></div>
+  </div>
+</div>
+
+<!-- ────────────── STATE 7: Remove confirmation ────────────── -->
+<div class="section-header">State 7 — Remove confirmation modal</div>
+<div style="max-width:340px;">
+  <div class="state-label">Clicking "Remove Video" shows a small confirmation modal</div>
+  <div class="profile-card" style="padding:0;">
+    <div class="modal-overlay" style="min-height:160px;">
+      <div class="modal-card">
+        <div class="modal-icon">🗑️</div>
+        <div class="modal-title">Remove intro video?</div>
+        <div class="modal-body">Your profile introduction video will be removed. You can add a new one at any time.</div>
+        <div class="modal-actions">
+          <button class="btn-ghost">Cancel</button>
+          <button class="btn-danger">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
