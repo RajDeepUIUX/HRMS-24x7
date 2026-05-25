@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Clock, ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Clock, ChevronDown, ChevronRight, CheckCircle2, FileText, PlayCircle } from 'lucide-react';
 
 interface Task {
   step: number;
   title: string;
   description: string;
   timing: string | null;
+  attachment?: { label: string; url: string };
+  videoLink?: { label: string; url: string };
 }
 
 const ALL_TASKS: Task[] = [
@@ -18,7 +20,7 @@ const ALL_TASKS: Task[] = [
   { step: 7,  title: 'Induction',                          description: 'Group induction session to learn about the company culture, history, and long-term vision from our leadership team.', timing: null },
   { step: 8,  title: 'Team introduction',                  description: 'Meeting with each of your team members. The goal is to understand their roles, how you will collaborate, and build initial rapport.', timing: null },
   { step: 9,  title: 'Complete Compliance courses',        description: 'Standard compliance courses for ethical conduct, and workplace safety.', timing: null },
-  { step: 10, title: 'Team Lunch',                         description: 'Team Lunch is a casual onboarding activity designed to help the new joiner connect with their team in a relaxed setting. It provides an opportunity to build rapport, understand team dynamics, and feel more comfortable in the workplace.', timing: '10 days after hire date' },
+  { step: 10, title: 'Team Lunch',                         description: 'Team Lunch is a casual onboarding activity designed to help the new joiner connect with their team in a relaxed setting. It provides an opportunity to build rapport, understand team dynamics, and feel more comfortable in the workplace.', timing: '10 days after hire date', attachment: { label: 'Team Lunch Guide.pdf', url: 'https://www.africau.edu/images/default/sample.pdf' }, videoLink: { label: 'Watch Intro Video', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' } },
 ];
 
 const TOTAL       = ALL_TASKS.length;
@@ -156,10 +158,36 @@ export default function StaffOnboardingView() {
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-bold text-[#101828] leading-[22px]">{task.title}</p>
                   <p className="text-[13px] text-[#667085] leading-[20px] mt-[2px]">{task.description}</p>
-                  {task.timing && (
-                    <div className="flex items-center gap-[5px] mt-[8px]">
-                      <Clock className="size-[13px] text-[#98a2b3] shrink-0" />
-                      <span className="text-[12px] text-[#98a2b3]">{task.timing}</span>
+                  {(task.timing || task.attachment || task.videoLink) && (
+                    <div className="flex flex-wrap items-center gap-x-[16px] gap-y-[6px] mt-[8px]">
+                      {task.timing && (
+                        <div className="flex items-center gap-[5px]">
+                          <Clock className="size-[13px] text-[#98a2b3] shrink-0" />
+                          <span className="text-[12px] text-[#98a2b3]">{task.timing}</span>
+                        </div>
+                      )}
+                      {task.attachment && (
+                        <a
+                          href={task.attachment.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-[5px] text-[#3a58ef] hover:text-[#2d46d6] transition-colors"
+                        >
+                          <FileText className="size-[13px] shrink-0" />
+                          <span className="text-[12px] font-medium">{task.attachment.label}</span>
+                        </a>
+                      )}
+                      {task.videoLink && (
+                        <a
+                          href={task.videoLink.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-[5px] text-[#3a58ef] hover:text-[#2d46d6] transition-colors"
+                        >
+                          <PlayCircle className="size-[13px] shrink-0" />
+                          <span className="text-[12px] font-medium">{task.videoLink.label}</span>
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>
