@@ -30,6 +30,7 @@ import StaffBenefitsView from './StaffBenefitsView';
 import AIAgentView from './AIAgentView';
 import AIAgentView2 from './AIAgentView2';
 import AIAgentView3 from './AIAgentView3';
+import StaffOnboardingView from './StaffOnboardingView';
 
 type ViewType =
   | 'dashboard'
@@ -144,6 +145,7 @@ export default function UnifiedHRApplication({ initialView }: UnifiedHRApplicati
       case 'employee-loan':
         return <EmployeeLoanView onNavigationChange={handleNavigationChange} />;
       case 'onboarding':
+        if (user?.role === 'staff') return <StaffOnboardingView />;
         return <OnboardingView onNavigationChange={handleNavigationChange} />;
       case 'activity-logs':
         return <ResponsiveActivityLogsView onNavigationChange={handleNavigationChange} />;
