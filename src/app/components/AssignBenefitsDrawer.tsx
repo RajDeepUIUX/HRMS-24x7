@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronDown, Calendar, CheckCircle, Trash2 } from 'lucide-react';
+import { X, ChevronDown, CheckCircle, Trash2 } from 'lucide-react';
 import type { Benefit, StaffMember, AllocationRecord } from './ViewAllocationDrawer';
 
 /* ─── Mock data (defined here; BenefitsView also uses it via import) ─── */
@@ -54,7 +54,7 @@ export const MOCK_STAFF: StaffMember[] = [
 
 /* ─── Types ─── */
 
-type AllocationMode = 'Lumpsum Value' | 'Value Per Staff' | 'Per Staff Allocation';
+type AllocationMode = 'Lumpsum Amount (equal distribution)' | 'Equal Amount Per Staff' | 'Custom Amount Per Staff';
 type DrawerStep     = 'form' | 'preview';
 
 interface AssignBenefitsDrawerProps {
@@ -105,28 +105,23 @@ function FieldLabel({ label, required }: { label: string; required?: boolean }) 
 
 export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: AssignBenefitsDrawerProps) {
   const [step, setStep]                   = useState<DrawerStep>('form');
-  const [mode, setMode]                   = useState<AllocationMode>('Lumpsum Value');
-  const [department, setDepartment]       = useState('');
+  const [mode, setMode]                   = useState<AllocationMode>('Lumpsum Amount (equal distribution)');
   const [staffSearch, setStaffSearch]     = useState('');
   const [selectedStaff, setSelectedStaff] = useState<StaffMember[]>([]);
   const [currency, setCurrency]           = useState('');
   const [value, setValue]                 = useState('');
-  const [disbursementDate, setDisbursementDate] = useState('');
   const [showSuccess, setShowSuccess]     = useState(false);
   const [dropdownOpen, setDropdownOpen]   = useState(false);
   const [chipsExpanded, setChipsExpanded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  /* Per Staff Allocation state */
-  const [selectedDepts, setSelectedDepts]       = useState<string[]>([]);
-  const [deptDropdownOpen, setDeptDropdownOpen] = useState(false);
-  const [psSelected, setPsSelected]             = useState<StaffMember[]>([]);
-  const [psStaffDropOpen, setPsStaffDropOpen]   = useState(false);
-  const [psStaffSearch, setPsStaffSearch]       = useState('');
-  const [staffAmounts, setStaffAmounts]         = useState<Record<string, string>>({});
-  const [columnCurrency, setColumnCurrency]     = useState('');
-  const deptDropdownRef  = useRef<HTMLDivElement>(null);
-  const psStaffDropRef   = useRef<HTMLDivElement>(null);
+  /* Custom Amount Per Staff state */
+  const [psSelected, setPsSelected]         = useState<StaffMember[]>([]);
+  const [psStaffDropOpen, setPsStaffDropOpen] = useState(false);
+  const [psStaffSearch, setPsStaffSearch]   = useState('');
+  const [staffAmounts, setStaffAmounts]     = useState<Record<string, string>>({});
+  const [columnCurrency, setColumnCurrency] = useState('');
+  const psStaffDropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -142,18 +137,6 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (deptDropdownRef.current && !deptDropdownRef.current.contains(e.target as Node)) {
-        setDeptDropdownOpen(false);
-      }
-    };
-    if (deptDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [deptDropdownOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
       if (psStaffDropRef.current && !psStaffDropRef.current.contains(e.target as Node)) {
         setPsStaffDropOpen(false);
       }
@@ -164,102 +147,63 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [psStaffDropOpen]);
 
-  /* When departments change, remove any selected staff that no longer belong */
-  useEffect(() => {
-    setPsSelected(prev => prev.filter(s => selectedDepts.includes(s.department)));
-  }, [selectedDepts]);
-
-  /* Staff pool for selected department */
-  const deptStaff = useMemo(
-    () => MOCK_STAFF.filter(s => s.department === department),
-    [department]
-  );
-
-  /* Filtered by search */
+  /* Filtered staff for modes 1 & 2 */
   const filteredStaff = useMemo(
-    () => deptStaff.filter(s => s.name.toLowerCase().includes(staffSearch.toLowerCase())),
-    [deptStaff, staffSearch]
+    () => MOCK_STAFF.filter(s => s.name.toLowerCase().includes(staffSearch.toLowerCase())),
+    [staffSearch]
   );
 
-  /* All staff from multi-selected departments (Per Staff Allocation pool) */
-  const perStaffStaff = useMemo(
-    () => MOCK_STAFF.filter(s => selectedDepts.includes(s.department)),
-    [selectedDepts]
-  );
-
-  /* Filtered staff for Per Staff Allocation picker dropdown */
+  /* Filtered staff for Custom Amount Per Staff picker */
   const filteredPsStaff = useMemo(
-    () => perStaffStaff.filter(s => s.name.toLowerCase().includes(psStaffSearch.toLowerCase())),
-    [perStaffStaff, psStaffSearch]
+    () => MOCK_STAFF.filter(s => s.name.toLowerCase().includes(psStaffSearch.toLowerCase())),
+    [psStaffSearch]
   );
 
   const isPsSelected   = (s: StaffMember) => psSelected.some(x => x.id === s.id);
   const togglePsStaff  = (s: StaffMember) => setPsSelected(prev => isPsSelected(s) ? prev.filter(x => x.id !== s.id) : [...prev, s]);
-  const psSelectAll    = () => setPsSelected(perStaffStaff);
+  const psSelectAll    = () => setPsSelected(MOCK_STAFF);
   const psClearAll     = () => setPsSelected([]);
   const removePsStaff  = (id: string) => setPsSelected(prev => prev.filter(s => s.id !== id));
 
-  const isSelected = (s: StaffMember) => selectedStaff.some(x => x.id === s.id);
-
-  const toggleStaff = (s: StaffMember) => {
-    setSelectedStaff(prev =>
-      isSelected(s) ? prev.filter(x => x.id !== s.id) : [...prev, s]
-    );
-  };
-
-  const handleDeptChange = (dept: string) => {
-    setDepartment(dept);
-    setSelectedStaff([]);
-    setStaffSearch('');
-    setDropdownOpen(false);
-    setChipsExpanded(false);
-  };
-
-  const selectAll = () => setSelectedStaff(deptStaff);
-  const clearAll  = () => setSelectedStaff([]);
+  const isSelected  = (s: StaffMember) => selectedStaff.some(x => x.id === s.id);
+  const toggleStaff = (s: StaffMember) => setSelectedStaff(prev => isSelected(s) ? prev.filter(x => x.id !== s.id) : [...prev, s]);
+  const selectAll   = () => setSelectedStaff(MOCK_STAFF);
+  const clearAll    = () => setSelectedStaff([]);
 
   /* Computed allocation values */
   const numValue    = Number(value) || 0;
   const staffCount  = selectedStaff.length;
-  const perStaff    = mode === 'Lumpsum Value' && staffCount > 0
+  const perStaff    = mode === 'Lumpsum Amount (equal distribution)' && staffCount > 0
     ? numValue / staffCount
     : numValue;
-  const totalAmount = mode === 'Lumpsum Value'
+  const totalAmount = mode === 'Lumpsum Amount (equal distribution)'
     ? numValue
     : numValue * staffCount;
 
   /* Form completeness */
-  const isFormComplete = mode === 'Per Staff Allocation'
+  const isFormComplete = mode === 'Custom Amount Per Staff'
     ? (
-        selectedDepts.length > 0 &&
         psSelected.length > 0 &&
         columnCurrency !== '' &&
-        disbursementDate !== '' &&
         psSelected.some(s => Number(staffAmounts[s.id]) > 0)
       )
     : (
-        department !== '' &&
         staffCount > 0 &&
         currency !== '' &&
-        numValue > 0 &&
-        disbursementDate !== ''
+        numValue > 0
       );
 
   /* Reset and close */
   const handleClose = () => {
     setStep('form');
-    setMode('Lumpsum Value');
-    setDepartment('');
+    setMode('Lumpsum Amount (equal distribution)');
     setStaffSearch('');
     setSelectedStaff([]);
     setCurrency('');
     setValue('');
-    setDisbursementDate('');
     setShowSuccess(false);
     setDropdownOpen(false);
     setChipsExpanded(false);
-    setSelectedDepts([]);
-    setDeptDropdownOpen(false);
     setPsSelected([]);
     setPsStaffDropOpen(false);
     setPsStaffSearch('');
@@ -270,16 +214,16 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
 
   /* Build record for onConfirm */
   const buildRecord = (): Omit<AllocationRecord, 'id'> => {
-    if (mode === 'Per Staff Allocation') {
+    if (mode === 'Custom Amount Per Staff') {
       const allocations: Record<string, number> = {};
       psSelected.forEach(s => { allocations[s.id] = Number(staffAmounts[s.id]) || 0; });
       const total = Object.values(allocations).reduce((sum, v) => sum + v, 0);
       return {
         benefit: benefit!,
-        department: selectedDepts.join(', '),
+        department: [...new Set(psSelected.map(s => s.department))].join(', '),
         mode,
         assignedOn: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-        disbursementDate: new Date(disbursementDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+        disbursementDate: '',
         staffMembers: psSelected,
         currency: columnCurrency,
         value: total,
@@ -289,7 +233,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
     }
     return {
       benefit: benefit!,
-      department,
+      department: [...new Set(selectedStaff.map(s => s.department))].join(', '),
       mode,
       assignedOn: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
       disbursementDate: new Date(disbursementDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
@@ -381,43 +325,33 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                 <div>
                   <FieldLabel label="Allocation Mode" required />
                   <div className="flex bg-[#f2f4f7] rounded-[8px] p-[4px] gap-[4px]">
-                    {(['Lumpsum Value', 'Value Per Staff', 'Per Staff Allocation'] as AllocationMode[]).map(m => (
+                    {([
+                      { value: 'Lumpsum Amount (equal distribution)' as AllocationMode, label: 'Lumpsum Amount' },
+                      { value: 'Equal Amount Per Staff'               as AllocationMode, label: 'Equal Amount Per Staff' },
+                      { value: 'Custom Amount Per Staff'              as AllocationMode, label: 'Custom Amount Per Staff' },
+                    ]).map(({ value: m, label }) => (
                       <button
                         key={m}
                         onClick={() => setMode(m)}
-                        className={`flex-1 py-[8px] px-[10px] rounded-[6px] text-[12px] font-semibold transition-all leading-[16px] ${
+                        className={`flex-1 py-[8px] px-[10px] rounded-[6px] text-[12px] font-semibold transition-all leading-[16px] text-center ${
                           mode === m
                             ? 'bg-white text-[#3a58ef] shadow-sm border border-[#e0e7ff]'
                             : 'text-[#667085] hover:text-[#344054]'
                         }`}
                       >
-                        {m}
+                        {label}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* ── Lumpsum Value / Value Per Staff sections ── */}
-                {mode !== 'Per Staff Allocation' && (<>
-
-                {/* Department */}
-                <div>
-                  <FieldLabel label="Department" required />
-                  <StyledSelect
-                    value={department}
-                    onChange={handleDeptChange}
-                    placeholder="Select department"
-                    options={DEPARTMENTS}
-                  />
-                </div>
+                {mode !== 'Custom Amount Per Staff' && (<>
 
                 {/* Select Staff */}
                 <div>
                   <FieldLabel label="Select Staff" required />
-                  {!department ? (
-                    <p className="text-[13px] text-[#98a2b3] italic">Select a department first.</p>
-                  ) : (
-                    <>
+                  <>
                       {/* Dropdown */}
                       <div className="relative" ref={dropdownRef}>
                         {/* Trigger */}
@@ -447,14 +381,14 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                               <div className="flex items-center justify-between">
                                 <label className="flex items-center gap-[6px] cursor-pointer">
                                   <div
-                                    onClick={() => selectedStaff.length === deptStaff.length ? clearAll() : selectAll()}
+                                    onClick={() => selectedStaff.length === MOCK_STAFF.length ? clearAll() : selectAll()}
                                     className={`size-[16px] rounded-[3px] border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
-                                      selectedStaff.length === deptStaff.length && deptStaff.length > 0
+                                      selectedStaff.length === MOCK_STAFF.length && MOCK_STAFF.length > 0
                                         ? 'bg-[#3a58ef] border-[#3a58ef]'
                                         : 'border-[#d0d5dd] bg-white'
                                     }`}
                                   >
-                                    {selectedStaff.length === deptStaff.length && deptStaff.length > 0 && (
+                                    {selectedStaff.length === MOCK_STAFF.length && MOCK_STAFF.length > 0 && (
                                       <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
                                         <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                                       </svg>
@@ -543,8 +477,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                         );
                       })()}
                     </>
-                  )}
-                </div>
+                  </div>
 
                 {/* Currency + Value (2-col) */}
                 <div className="grid grid-cols-2 gap-[16px]">
@@ -581,88 +514,11 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                 {/* ── End Lumpsum / Value Per Staff sections ── */}
 
                 {/* ── Per Staff Allocation sections ── */}
-                {mode === 'Per Staff Allocation' && (<>
+                {mode === 'Custom Amount Per Staff' && (<>
 
-                {/* Department multi-select */}
-                <div>
-                  <FieldLabel label="Department" required />
-                  <div className="relative" ref={deptDropdownRef}>
-                    <button
-                      type="button"
-                      onClick={() => setDeptDropdownOpen(prev => !prev)}
-                      className="w-full flex items-center justify-between pl-[12px] pr-[12px] py-[10px] border border-[#d0d5dd] rounded-[8px] text-[14px] bg-white hover:border-[#3a58ef] focus:outline-none focus:ring-2 focus:ring-[#3a58ef]/20 focus:border-[#3a58ef] transition-all"
-                    >
-                      <span className={selectedDepts.length > 0 ? 'text-[#101828]' : 'text-[#98a2b3]'}>
-                        {selectedDepts.length > 0 ? selectedDepts.join(', ') : 'Select departments'}
-                      </span>
-                      <ChevronDown size={16} className={`text-[#667085] transition-transform ${deptDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {deptDropdownOpen && (
-                      <div className="absolute top-[calc(100%+4px)] left-0 right-0 border border-[#d0d5dd] rounded-[8px] overflow-hidden bg-white z-[50] shadow-[0px_4px_16px_0px_rgba(16,24,40,0.12)]">
-                        {/* Controls */}
-                        <div className="px-[12px] pt-[10px] pb-[8px] border-b border-[#eaecf0] bg-[#f9fafb] flex items-center justify-between">
-                          <label className="flex items-center gap-[6px] cursor-pointer">
-                            <div
-                              onClick={() => setSelectedDepts(selectedDepts.length === DEPARTMENTS.length ? [] : [...DEPARTMENTS])}
-                              className={`size-[16px] rounded-[3px] border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
-                                selectedDepts.length === DEPARTMENTS.length
-                                  ? 'bg-[#3a58ef] border-[#3a58ef]'
-                                  : 'border-[#d0d5dd] bg-white'
-                              }`}
-                            >
-                              {selectedDepts.length === DEPARTMENTS.length && (
-                                <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
-                                  <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                              )}
-                            </div>
-                            <span className="text-[12px] font-semibold text-[#344054]">Select All</span>
-                          </label>
-                          <button
-                            onClick={() => setSelectedDepts([])}
-                            className="text-[12px] font-semibold text-[#667085] hover:text-[#d92d20] transition-colors"
-                          >
-                            Deselect All
-                          </button>
-                        </div>
-                        {/* Dept list */}
-                        <div>
-                          {DEPARTMENTS.map(dept => {
-                            const checked = selectedDepts.includes(dept);
-                            return (
-                              <label
-                                key={dept}
-                                className="flex items-center gap-[10px] px-[12px] py-[10px] hover:bg-[#f9fafb] cursor-pointer border-b border-[#f2f4f7] last:border-0 transition-colors"
-                              >
-                                <div
-                                  onClick={() => setSelectedDepts(prev => checked ? prev.filter(d => d !== dept) : [...prev, dept])}
-                                  className={`size-[16px] rounded-[3px] border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
-                                    checked ? 'bg-[#3a58ef] border-[#3a58ef]' : 'border-[#d0d5dd] bg-white'
-                                  }`}
-                                >
-                                  {checked && (
-                                    <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
-                                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  )}
-                                </div>
-                                <span className="text-[13px] text-[#344054]">{dept}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Select Staff for Per Staff Allocation */}
+                {/* Select Staff for Custom Amount Per Staff */}
                 <div>
                   <FieldLabel label="Select Staff" required />
-                  {selectedDepts.length === 0 ? (
-                    <p className="text-[13px] text-[#98a2b3] italic">Select a department first.</p>
-                  ) : (
                     <div className="relative" ref={psStaffDropRef}>
                       <button
                         type="button"
@@ -688,14 +544,14 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                             <div className="flex items-center justify-between">
                               <label className="flex items-center gap-[6px] cursor-pointer">
                                 <div
-                                  onClick={() => psSelected.length === perStaffStaff.length ? psClearAll() : psSelectAll()}
+                                  onClick={() => psSelected.length === MOCK_STAFF.length ? psClearAll() : psSelectAll()}
                                   className={`size-[16px] rounded-[3px] border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
-                                    psSelected.length === perStaffStaff.length && perStaffStaff.length > 0
+                                    psSelected.length === MOCK_STAFF.length && MOCK_STAFF.length > 0
                                       ? 'bg-[#3a58ef] border-[#3a58ef]'
                                       : 'border-[#d0d5dd] bg-white'
                                   }`}
                                 >
-                                  {psSelected.length === perStaffStaff.length && perStaffStaff.length > 0 && (
+                                  {psSelected.length === MOCK_STAFF.length && MOCK_STAFF.length > 0 && (
                                     <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
                                       <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
@@ -741,7 +597,6 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                         </div>
                       )}
                     </div>
-                  )}
                 </div>
 
                 {/* Staff Allocation Table */}
@@ -809,25 +664,11 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                 </>)}
                 {/* ── End Per Staff Allocation sections ── */}
 
-                {/* Disbursement Date */}
-                <div>
-                  <FieldLabel label="Disbursement Date" required />
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={disbursementDate}
-                      onChange={e => setDisbursementDate(e.target.value)}
-                      className="w-full pl-[12px] pr-[40px] py-[10px] border border-[#d0d5dd] rounded-[8px] text-[14px] text-[#101828] bg-white focus:outline-none focus:ring-2 focus:ring-[#3a58ef]/20 focus:border-[#3a58ef] transition-all"
-                    />
-                    <Calendar size={16} className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#667085] pointer-events-none" />
-                  </div>
-                </div>
-
                 {/* Live allocation message (Lumpsum / Value Per Staff only) */}
-                {mode !== 'Per Staff Allocation' && numValue > 0 && staffCount > 0 && currency && (
+                {mode !== 'Custom Amount Per Staff' && numValue > 0 && staffCount > 0 && currency && (
                   <div className="p-[12px] bg-[#eff4ff] border border-[#c7d7fd] rounded-[8px]">
                     <p className="text-[13px] text-[#3a58ef] leading-[20px]">
-                      {mode === 'Lumpsum Value'
+                      {mode === 'Lumpsum Amount (equal distribution)'
                         ? <>The total lumpsum value of <strong>{numValue.toLocaleString()} {currency}</strong> will be distributed equally among <strong>{staffCount} selected staff members</strong>. Each staff member will receive <strong>{perStaff.toFixed(2)} {currency}</strong>.</>
                         : <>Each of the <strong>{staffCount} selected staff members</strong> will receive <strong>{numValue.toLocaleString()} {currency}</strong>. Total allocation will be <strong>{totalAmount.toLocaleString()} {currency}</strong>.</>
                       }
@@ -836,7 +677,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                 )}
 
                 {/* Live total for Per Staff Allocation */}
-                {mode === 'Per Staff Allocation' && columnCurrency && psSelected.some(s => Number(staffAmounts[s.id]) > 0) && (
+                {mode === 'Custom Amount Per Staff' && columnCurrency && psSelected.some(s => Number(staffAmounts[s.id]) > 0) && (
                   <div className="p-[12px] bg-[#eff4ff] border border-[#c7d7fd] rounded-[8px]">
                     <p className="text-[13px] text-[#3a58ef] leading-[20px]">
                       Total allocation across <strong>{psSelected.filter(s => Number(staffAmounts[s.id]) > 0).length} staff members</strong> is <strong>{psSelected.reduce((sum, s) => sum + (Number(staffAmounts[s.id]) || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {columnCurrency}</strong>.
@@ -851,7 +692,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
             {step === 'preview' && (
               <div className="flex-1 overflow-y-auto px-[24px] py-[20px] space-y-[20px]">
 
-                {mode === 'Per Staff Allocation' ? (
+                {mode === 'Custom Amount Per Staff' ? (
                   <>
                     {/* Per Staff Allocation preview table */}
                     <div className="border border-[#eaecf0] rounded-[8px] overflow-hidden">
@@ -886,7 +727,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                         <h3 className="text-[13px] font-bold text-[#1d2939]">Total Allocation Summary</h3>
                       </div>
                       {[
-                        { label: 'Allocation Mode',  value: 'Per Staff Allocation' },
+                        { label: 'Allocation Mode',  value: 'Custom Amount Per Staff' },
                         { label: 'Departments',       value: selectedDepts.join(', ') },
                         { label: 'Total Staff',       value: String(psSelected.length) },
                         { label: 'Currency',          value: columnCurrency },
@@ -933,7 +774,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                       {[
                         { label: 'Allocation Mode',  value: mode },
                         { label: 'Selected Staff',   value: String(staffCount) },
-                        { label: 'Value Per Staff',  value: `${perStaff.toFixed(2)} ${currency}` },
+                        { label: 'Equal Amount Per Staff',  value: `${perStaff.toFixed(2)} ${currency}` },
                         { label: 'Total Allocation', value: `${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}` },
                       ].map(({ label, value: val }, i, arr) => (
                         <div key={label} className={`flex items-center py-[10px] px-[16px] ${i % 2 === 0 ? 'bg-[#f9fafb]' : 'bg-white'} ${i < arr.length - 1 ? 'border-b border-[#eaecf0]' : ''}`}>

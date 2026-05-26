@@ -19,9 +19,9 @@ export interface AllocationRecord {
   id: string;
   benefit: Benefit;
   department: string;
-  mode: 'Lumpsum Value' | 'Value Per Staff' | 'Per Staff Allocation';
+  mode: 'Lumpsum Amount (equal distribution)' | 'Equal Amount Per Staff' | 'Custom Amount Per Staff';
   assignedOn: string;
-  disbursementDate: string;
+  disbursementDate: string; // kept for type compat, value is empty string
   staffMembers: StaffMember[];
   currency: string;
   // Lumpsum: value = total entered (per-staff = value / count)
@@ -35,18 +35,18 @@ export interface AllocationRecord {
 /* ─── Helpers ─── */
 
 export function computePerStaff(record: AllocationRecord): number {
-  if (record.mode === 'Per Staff Allocation') return 0;
-  return record.mode === 'Lumpsum Value'
+  if (record.mode === 'Custom Amount Per Staff') return 0;
+  return record.mode === 'Lumpsum Amount (equal distribution)'
     ? record.value / record.staffMembers.length
     : record.value;
 }
 
 export function computeTotal(record: AllocationRecord): number {
-  if (record.mode === 'Per Staff Allocation') {
+  if (record.mode === 'Custom Amount Per Staff') {
     if (!record.staffAllocations) return 0;
     return Object.values(record.staffAllocations).reduce((sum, v) => sum + v, 0);
   }
-  return record.mode === 'Lumpsum Value'
+  return record.mode === 'Lumpsum Amount (equal distribution)'
     ? record.value
     : record.value * record.staffMembers.length;
 }
@@ -108,7 +108,6 @@ export default function ViewAllocationDrawer({ record, onClose }: ViewAllocation
                   { label: 'Department',         value: record.department },
                   { label: 'Allocation Mode',    value: record.mode },
                   { label: 'Assigned On',        value: record.assignedOn },
-                  { label: 'Disbursement Date',  value: record.disbursementDate },
                   { label: 'No. of Staffs',      value: String(record.staffMembers.length) },
                   { label: 'Currency',           value: record.currency },
                   { label: 'Amount',             value: `${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${record.currency}` },
@@ -137,7 +136,7 @@ export default function ViewAllocationDrawer({ record, onClose }: ViewAllocation
                   <table className="w-full border-collapse">
                     <thead>
                       <tr>
-                        {record.mode === 'Per Staff Allocation'
+                        {record.mode === 'Custom Amount Per Staff'
                           ? ['Staff Name', 'Department', 'Amount', 'Currency'].map(col => (
                               <th key={col} className="bg-[#ebeefd] px-[16px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] whitespace-nowrap">{col}</th>
                             ))
@@ -150,7 +149,7 @@ export default function ViewAllocationDrawer({ record, onClose }: ViewAllocation
                     <tbody>
                       {record.staffMembers.map((s, i) => (
                         <tr key={s.id} className={`border-b border-[#f2f2f2] last:border-0 ${i % 2 !== 0 ? 'bg-[#f9fafb]' : ''}`}>
-                          {record.mode === 'Per Staff Allocation' ? (
+                          {record.mode === 'Custom Amount Per Staff' ? (
                             <>
                               <td className="px-[16px] py-[12px] text-[14px] text-[#101828]">{s.name}</td>
                               <td className="px-[16px] py-[12px] text-[14px] text-[#344054]">{s.department}</td>
