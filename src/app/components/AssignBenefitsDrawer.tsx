@@ -236,7 +236,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
       department: [...new Set(selectedStaff.map(s => s.department))].join(', '),
       mode,
       assignedOn: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-      disbursementDate: new Date(disbursementDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      disbursementDate: '',
       staffMembers: selectedStaff,
       currency,
       value: numValue,
@@ -343,6 +343,21 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Mode info text */}
+                <div className="flex items-start gap-[8px] p-[10px] bg-[#f5f8ff] border border-[#c5cae0] rounded-[8px]">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 mt-[1px]" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 14.667A6.667 6.667 0 1 0 8 1.333a6.667 6.667 0 0 0 0 13.334Z" stroke="#3a58ef" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8 10.667V8M8 5.333h.007" stroke="#3a58ef" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <p className="text-[12px] text-[#3a58ef] leading-[18px]">
+                    {mode === 'Lumpsum Amount (equal distribution)'
+                      ? 'Enter a single total amount that is automatically split equally among all selected staff members.'
+                      : mode === 'Equal Amount Per Staff'
+                        ? 'Assign a custom individual amount to each selected staff member independently.'
+                        : 'Set a fixed amount per person, and the system calculates the total based on the number of staff selected.'}
+                  </p>
                 </div>
 
                 {/* ── Lumpsum Value / Value Per Staff sections ── */}
@@ -589,7 +604,6 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                                     )}
                                   </div>
                                   <span className="text-[13px] text-[#344054]">{s.name}</span>
-                                  <span className="text-[12px] text-[#98a2b3] ml-auto">{s.department}</span>
                                 </label>
                               ))
                             )}
@@ -607,10 +621,8 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                       <table className="w-full border-collapse">
                         <thead>
                           <tr>
-                            <th className="bg-[#ebeefd] px-[14px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[30%]">Staff Name</th>
-                            <th className="bg-[#ebeefd] px-[14px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[22%]">Department</th>
-                            <th className="bg-[#ebeefd] px-[14px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[26%]">Amount</th>
-                            <th className="bg-[#ebeefd] px-[10px] py-[10px] text-left border-b border-[#eaecf0] w-[14%]">
+                            <th className="bg-[#ebeefd] px-[14px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[32%]">Staff Name</th>
+                            <th className="bg-[#ebeefd] px-[10px] py-[10px] text-left border-b border-[#eaecf0] w-[24%]">
                               <div className="flex items-center gap-[4px]">
                                 <span className="text-[12px] font-semibold text-[#1d2939]">Currency</span>
                                 <select
@@ -623,14 +635,17 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                                 </select>
                               </div>
                             </th>
-                            <th className="bg-[#ebeefd] px-[10px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[8%]">Action</th>
+                            <th className="bg-[#ebeefd] px-[14px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[32%]">Amount</th>
+                            <th className="bg-[#ebeefd] px-[10px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] w-[12%]">Action</th>
                           </tr>
                         </thead>
                         <tbody>
                           {psSelected.map((s, i) => (
                             <tr key={s.id} className={`border-b border-[#f2f2f2] last:border-0 ${i % 2 !== 0 ? 'bg-[#f9fafb]' : ''}`}>
                               <td className="px-[14px] py-[10px] text-[13px] text-[#101828] font-medium">{s.name}</td>
-                              <td className="px-[14px] py-[10px] text-[13px] text-[#667085]">{s.department}</td>
+                              <td className="px-[14px] py-[10px] text-[13px] font-semibold text-[#667085]">
+                                {columnCurrency || '—'}
+                              </td>
                               <td className="px-[14px] py-[10px]">
                                 <input
                                   type="number"
@@ -640,9 +655,6 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                                   onChange={e => setStaffAmounts(prev => ({ ...prev, [s.id]: e.target.value }))}
                                   className="w-full px-[8px] py-[6px] border border-[#d0d5dd] rounded-[6px] text-[13px] text-[#101828] bg-white focus:outline-none focus:ring-1 focus:ring-[#3a58ef] focus:border-[#3a58ef] transition-all"
                                 />
-                              </td>
-                              <td className="px-[14px] py-[10px] text-[13px] font-semibold text-[#667085]">
-                                {columnCurrency || '—'}
                               </td>
                               <td className="px-[10px] py-[10px] text-center">
                                 <button
@@ -699,7 +711,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                       <table className="w-full border-collapse">
                         <thead>
                           <tr>
-                            {['Staff Name', 'Department', 'Amount', 'Currency'].map(col => (
+                            {['Staff Name', 'Currency', 'Amount'].map(col => (
                               <th key={col} className="bg-[#ebeefd] px-[16px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] whitespace-nowrap">
                                 {col}
                               </th>
@@ -710,11 +722,10 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                           {psSelected.map((s, i) => (
                             <tr key={s.id} className={`border-b border-[#f2f2f2] last:border-0 ${i % 2 !== 0 ? 'bg-[#f9fafb]' : ''}`}>
                               <td className="px-[16px] py-[12px] text-[14px] text-[#101828]">{s.name}</td>
-                              <td className="px-[16px] py-[12px] text-[14px] text-[#344054]">{s.department}</td>
+                              <td className="px-[16px] py-[12px] text-[14px] text-[#667085] font-medium">{columnCurrency}</td>
                               <td className="px-[16px] py-[12px] text-[14px] text-[#344054]">
                                 {(Number(staffAmounts[s.id]) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </td>
-                              <td className="px-[16px] py-[12px] text-[14px] text-[#667085] font-medium">{columnCurrency}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -728,7 +739,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                       </div>
                       {[
                         { label: 'Allocation Mode',  value: 'Custom Amount Per Staff' },
-                        { label: 'Departments',       value: selectedDepts.join(', ') },
+                        { label: 'Departments',       value: [...new Set(psSelected.map(s => s.department))].join(', ') },
                         { label: 'Total Staff',       value: String(psSelected.length) },
                         { label: 'Currency',          value: columnCurrency },
                         { label: 'Total Allocation',  value: `${psSelected.reduce((sum, s) => sum + (Number(staffAmounts[s.id]) || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${columnCurrency}` },
@@ -747,7 +758,7 @@ export default function AssignBenefitsDrawer({ benefit, onClose, onConfirm }: As
                       <table className="w-full border-collapse">
                         <thead>
                           <tr>
-                            {['Employee', 'Allocated Benefit', 'Value'].map(col => (
+                            {['Staff Name', 'Allocated Benefit', 'Value'].map(col => (
                               <th key={col} className="bg-[#ebeefd] px-[16px] py-[10px] text-left text-[12px] font-semibold text-[#1d2939] border-b border-[#eaecf0] whitespace-nowrap">
                                 {col}
                               </th>
