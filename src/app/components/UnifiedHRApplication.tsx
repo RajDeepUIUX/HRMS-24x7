@@ -28,8 +28,6 @@ import ReimbursementView from './ReimbursementView';
 import ClientExpensesView from './ClientExpensesView';
 import StaffBenefitsView from './StaffBenefitsView';
 import AIAgentView from './AIAgentView';
-import AIAgentView2 from './AIAgentView2';
-import AIAgentView3 from './AIAgentView3';
 import StaffOnboardingView from './StaffOnboardingView';
 
 type ViewType =
@@ -59,9 +57,7 @@ type ViewType =
   | 'reimbursement'
   | 'client-expenses'
   | 'staff-benefits'
-  | 'ai-agent'
-  | 'ai-agent-2'
-  | 'ai-agent-3';
+  | 'ai-agent';
 
 export interface StaffCandidate {
   id: string;
@@ -122,7 +118,7 @@ export default function UnifiedHRApplication({ initialView }: UnifiedHRApplicati
 
   // Save current view to localStorage whenever it changes
   useEffect(() => {
-    const viewToSave = currentView === 'request-technical-assessment' ? 'shortlisted' : (currentView === 'ai-agent' || currentView === 'ai-agent-2' || currentView === 'ai-agent-3') ? 'task-repository' : currentView;
+    const viewToSave = currentView === 'request-technical-assessment' ? 'shortlisted' : currentView === 'ai-agent' ? 'task-repository' : currentView;
     localStorage.setItem('hr-current-view', viewToSave);
   }, [currentView]);
 
@@ -212,10 +208,6 @@ export default function UnifiedHRApplication({ initialView }: UnifiedHRApplicati
         return <StaffBenefitsView />;
       case 'ai-agent':
         return <AIAgentView />;
-      case 'ai-agent-2':
-        return <AIAgentView2 />;
-      case 'ai-agent-3':
-        return <AIAgentView3 />;
       case 'benefits':
         return <BenefitsView onNavigationChange={handleNavigationChange} />;
       case 'user-profile':
@@ -232,8 +224,6 @@ export default function UnifiedHRApplication({ initialView }: UnifiedHRApplicati
       <div className="h-16 flex-shrink-0 relative z-50 overflow-visible">
         <HeaderWithAuth
           onOpenAI={() => handleNavigationChange('ai-agent')}
-          onOpenAI2={() => handleNavigationChange('ai-agent-2')}
-          onOpenAI3={() => handleNavigationChange('ai-agent-3')}
         />
       </div>
 
@@ -245,7 +235,7 @@ export default function UnifiedHRApplication({ initialView }: UnifiedHRApplicati
             isExpanded={sidebarExpanded}
             onToggle={handleSidebarToggle}
             onNavigationChange={handleNavigationChange}
-            currentView={currentView === 'request-technical-assessment' ? 'shortlisted' : (currentView === 'ai-agent' || currentView === 'ai-agent-2' || currentView === 'ai-agent-3') ? '' : currentView}
+            currentView={currentView === 'request-technical-assessment' ? 'shortlisted' : currentView === 'ai-agent' ? '' : currentView}
           />
         </div>
 

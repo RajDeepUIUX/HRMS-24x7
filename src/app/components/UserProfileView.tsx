@@ -1525,33 +1525,100 @@ function VideoIntroTabContent({ video, setVideo }: { video: VideoIntro; setVideo
 
         {/* ── Empty state ── */}
         {video.type === 'none' && uploadProgress === null && mode === 'idle' && (
-          <div className="flex flex-col items-center text-center py-[32px] px-[24px]">
-            <div className="w-[56px] h-[56px] rounded-[12px] bg-[#ebeefd] flex items-center justify-center mb-[16px]">
-              <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                <rect x="2" y="4" width="22" height="18" rx="3" stroke="#3a58ef" strokeWidth="1.8"/>
-                <path d="M10 17V9l8 4-8 4z" fill="#3a58ef"/>
-              </svg>
+          <div className="flex flex-col gap-[20px]">
+
+            {/* ── 1. Add video hero CTA ── */}
+            <div className="rounded-[12px] overflow-hidden border border-[#c5cae0]" style={{ background: 'linear-gradient(135deg, #f0f3ff 0%, #f3f0ff 100%)' }}>
+              <div className="px-[24px] py-[20px] flex items-center justify-between gap-[16px]">
+                <div className="flex items-center gap-[16px]">
+                  <div className="w-[52px] h-[52px] rounded-[12px] bg-white flex items-center justify-center flex-shrink-0 shadow-[0px_1px_3px_rgba(58,88,239,0.18)]">
+                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+                      <rect x="2" y="4" width="22" height="18" rx="3" stroke="#3a58ef" strokeWidth="1.8"/>
+                      <path d="M10 17V9l8 4-8 4z" fill="#3a58ef"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-bold text-[15px] text-[#101828] leading-[22px]">Add Your Profile Introduction Video</p>
+                    <p className="text-[12px] text-[#667085] leading-[18px] mt-[2px]">Let clients and your team get to know you in 60–90 seconds</p>
+                  </div>
+                </div>
+                <div className="flex gap-[10px] flex-shrink-0">
+                  <button
+                    onClick={startAddLink}
+                    className="flex items-center gap-[7px] px-[16px] py-[9px] border border-[#c5cae0] bg-white rounded-[6px] text-[13px] font-semibold text-[#344054] hover:bg-[#f9fafb] transition-colors shadow-[0px_1px_2px_rgba(16,24,40,0.06)] whitespace-nowrap"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M6.5 8a3.5 3.5 0 0 0 5 .14l1.27-1.27a3.5 3.5 0 0 0-4.95-4.95L6.5 3.25" stroke="#344054" strokeWidth="1.4" strokeLinecap="round"/><path d="M8.5 7a3.5 3.5 0 0 0-5-.14L2.23 8.13a3.5 3.5 0 0 0 4.95 4.95L8.5 11.75" stroke="#344054" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                    Add via Link
+                  </button>
+                  <button
+                    onClick={() => { setMode('replace'); setTimeout(() => fileInputRef.current?.click(), 0); }}
+                    className="flex items-center gap-[7px] px-[16px] py-[9px] bg-[#3a58ef] rounded-[6px] text-[13px] font-semibold text-white hover:bg-[#2d47d1] transition-colors shadow-[0px_1px_2px_rgba(58,88,239,0.25)] whitespace-nowrap"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5v8M4.5 5l3-3.5 3 3.5M1.5 11v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V11" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    Upload Video
+                  </button>
+                </div>
+              </div>
             </div>
-            <p className="font-semibold text-[15px] text-[#101828] mb-[6px]">No intro video added yet</p>
-            <p className="text-[13px] text-[#667085] max-w-[380px] mb-[24px] leading-[20px]">
-              Add a short introduction video so clients and your team can get to know you. You can add a link or upload a file directly.
-            </p>
-            <div className="flex gap-[12px]">
-              <button
-                onClick={startAddLink}
-                className="flex items-center gap-[8px] px-[18px] py-[9px] border border-[#d0d5dd] rounded-[4px] text-[13px] font-semibold text-[#344054] hover:bg-[#f9fafb] transition-colors shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
-              >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M6.5 8a3.5 3.5 0 0 0 5 .14l1.27-1.27a3.5 3.5 0 0 0-4.95-4.95L6.5 3.25" stroke="#344054" strokeWidth="1.4" strokeLinecap="round"/><path d="M8.5 7a3.5 3.5 0 0 0-5-.14L2.23 8.13a3.5 3.5 0 0 0 4.95 4.95L8.5 11.75" stroke="#344054" strokeWidth="1.4" strokeLinecap="round"/></svg>
-                Add via Link
-              </button>
-              <button
-                onClick={() => { setMode('replace'); setTimeout(() => fileInputRef.current?.click(), 0); }}
-                className="flex items-center gap-[8px] px-[18px] py-[9px] bg-[#3a58ef] rounded-[4px] text-[13px] font-semibold text-white hover:bg-[#2d47d1] transition-colors shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
-              >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5v8M4.5 5l3-3.5 3 3.5M1.5 11v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V11" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                Upload Video
-              </button>
+
+            {/* ── 2. Two-column info row ── */}
+            <div className="grid grid-cols-2 gap-[16px]">
+
+              {/* Sample CTA card */}
+              <div className="border border-[#eaecf0] rounded-[10px] overflow-hidden">
+                <div className="px-[16px] py-[12px] flex items-center gap-[10px] border-b border-[#eaecf0]" style={{ background: 'linear-gradient(135deg, #fff8eb 0%, #fff3e0 100%)' }}>
+                  <div className="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.14)' }}>
+                    <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                      <rect x="1" y="3" width="16" height="12" rx="2.5" stroke="#d97706" strokeWidth="1.5"/>
+                      <path d="M7 12V6l5 3-5 3z" fill="#d97706"/>
+                    </svg>
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#92400e]">Sample Introduction</p>
+                </div>
+                <div className="px-[16px] py-[12px] flex flex-col gap-[10px]">
+                  <p className="text-[12px] text-[#667085] leading-[18px]">
+                    A good intro is <span className="font-semibold text-[#344054]">60–90 seconds</span>. Cover who you are, your expertise, and what clients can expect. Keep it natural — no script needed.
+                  </p>
+                  <a
+                    href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-[5px] text-[12px] font-semibold text-[#d97706] hover:text-[#b45309] transition-colors"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M5 9.5V3.5l5 3-5 3z" fill="currentColor"/>
+                    </svg>
+                    Watch a sample video
+                  </a>
+                </div>
+              </div>
+
+              {/* Why it matters card */}
+              <div className="border border-[#eaecf0] rounded-[10px] overflow-hidden">
+                <div className="px-[16px] py-[12px] flex items-center gap-[10px] border-b border-[#eaecf0]" style={{ background: 'linear-gradient(135deg, #ecfdf3 0%, #e8f8f0 100%)' }}>
+                  <div className="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(18,183,106,0.14)' }}>
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                      <path d="M2.5 8.5l3.5 3.5 7.5-7.5" stroke="#12b76a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className="text-[13px] font-semibold text-[#065f46]">Why it matters</p>
+                </div>
+                <div className="px-[16px] py-[12px] flex flex-col gap-[8px]">
+                  {[
+                    'Clients feel more confident hiring someone they can put a face to',
+                    'Profiles with a video get noticed faster during shortlisting',
+                    'Shows communication skills before the first interview',
+                  ].map((text, i) => (
+                    <div key={i} className="flex items-start gap-[8px]">
+                      <span className="mt-[5px] w-[5px] h-[5px] rounded-full bg-[#12b76a] flex-shrink-0" />
+                      <p className="text-[12px] text-[#667085] leading-[18px]">{text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
+
           </div>
         )}
 

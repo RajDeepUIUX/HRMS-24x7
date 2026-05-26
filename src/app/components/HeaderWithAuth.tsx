@@ -18,7 +18,7 @@ const roles: { id: UserRole; label: string; description: string }[] = [
   { id: 'staff', label: 'User', description: 'Personal portal access' },
 ];
 
-export default function HeaderWithAuth({ onOpenAI, onOpenAI2, onOpenAI3 }: { onOpenAI?: () => void; onOpenAI2?: () => void; onOpenAI3?: () => void }) {
+export default function HeaderWithAuth({ onOpenAI }: { onOpenAI?: () => void }) {
   const { logout, user, login } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,21 +57,6 @@ export default function HeaderWithAuth({ onOpenAI, onOpenAI2, onOpenAI3 }: { onO
           <SparkleIcon />
           <span className="text-[13px] font-semibold text-white leading-[18px]">AI Agent</span>
         </button>
-        <button
-          onClick={onOpenAI2}
-          className="flex items-center gap-[7px] px-[14px] py-[7px] bg-[#3a58ef] hover:bg-[#2d47d1] rounded-[6px] transition-colors shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
-        >
-          <SparkleIcon />
-          <span className="text-[13px] font-semibold text-white leading-[18px]">AI Agent 2</span>
-        </button>
-        <button
-          onClick={onOpenAI3}
-          className="flex items-center gap-[7px] px-[14px] py-[7px] bg-[#3a58ef] hover:bg-[#2d47d1] rounded-[6px] transition-colors shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
-        >
-          <SparkleIcon />
-          <span className="text-[13px] font-semibold text-white leading-[18px]">AI Agent 3</span>
-        </button>
-
         {/* Role Switcher */}
         <div className="relative" ref={dropdownRef}>
           <button
