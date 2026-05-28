@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, FileText, X } from 'lucide-react';
+import CustomizeOfferLetterView from './CustomizeOfferLetterView';
 
 interface StaffAgreement {
   id: string;
@@ -15,11 +16,13 @@ interface StaffAgreement {
 
 interface StaffAgreementsViewProps {
   onNavigationChange?: (view: string, data?: unknown) => void;
+  sidebarExpanded?: boolean;
 }
 
-export default function StaffAgreementsView({ onNavigationChange }: StaffAgreementsViewProps) {
+export default function StaffAgreementsView({ onNavigationChange, sidebarExpanded = true }: StaffAgreementsViewProps) {
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [generatingForStaff, setGeneratingForStaff] = useState<StaffAgreement | null>(null);
+  const [offerLetterStaff, setOfferLetterStaff] = useState<StaffAgreement | null>(null);
 
   const [staffAgreements, setStaffAgreements] = useState<StaffAgreement[]>([
     { id: 'SA-001', staffName: 'Deepa Varma', designation: 'Sr. Tax Manager', tentativeJoiningDate: 'Nov 12, 2024', workMode: 'WFO', location: 'Ahmedabad', level: 'L3', status: 'Not Generated', actionActive: true },
@@ -66,8 +69,31 @@ export default function StaffAgreementsView({ onNavigationChange }: StaffAgreeme
       )
     );
     setIsGenerateModalOpen(false);
+    setOfferLetterStaff(generatingForStaff);
     setGeneratingForStaff(null);
   };
+
+  const handleSendForESign = () => {
+    if (!offerLetterStaff) return;
+    setStaffAgreements(prev =>
+      prev.map(a =>
+        a.id === offerLetterStaff.id ? { ...a, status: 'E-Sign Pending' as const, actionActive: false } : a
+      )
+    );
+    setOfferLetterStaff(null);
+  };
+
+  /* show Customize Offer Letter when a staff is selected */
+  if (offerLetterStaff) {
+    return (
+      <CustomizeOfferLetterView
+        staff={offerLetterStaff}
+        sidebarExpanded={sidebarExpanded}
+        onClose={() => setOfferLetterStaff(null)}
+        onSendForESign={handleSendForESign}
+      />
+    );
+  }
 
   return (
     <div className="bg-white box-border flex flex-col gap-[24px] h-full items-stretch overflow-auto p-[16px] md:p-[24px] relative rounded-[8px] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.1),0px_1px_2px_0px_rgba(16,24,40,0.06)] w-full font-sans">

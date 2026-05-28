@@ -160,7 +160,7 @@ export default function UnifiedHRApplication({ initialView }: UnifiedHRApplicati
       case 'client-referral':
         return <ClientReferralView onNavigationChange={handleNavigationChange} />;
       case 'staff-agreements':
-        return <StaffAgreementsView onNavigationChange={handleNavigationChange} />;
+        return <StaffAgreementsView onNavigationChange={handleNavigationChange} sidebarExpanded={sidebarExpanded} />;
       case 'timesheets':
         return <TimesheetsView onNavigationChange={handleNavigationChange} />;
       case 'staff-profiling':
